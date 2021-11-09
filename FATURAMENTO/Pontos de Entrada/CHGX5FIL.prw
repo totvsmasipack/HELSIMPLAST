@@ -11,10 +11,5 @@
  *------------------------------------------------------------------------------------------------------*/
  
 User Function CHGX5FIL()
-Local cFilSX5
 
-If SUBSTR(cNumEmp,1,2) == "15"  // HELSIMPLAST
-    cFilSX5 := cFilAnt // Filial corrente
-EndIf
-
-Return(cFilSX5)
+Return(cFilAnt)
