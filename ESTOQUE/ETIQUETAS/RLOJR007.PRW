@@ -42,13 +42,16 @@ Local nCont     := 0
     
     SELECT	C2_NUM + C2_ITEM + C2_SEQUEN AS OP,
     		C2_PRODUTO, B1_DESC, B1_QE
-    FROM %Table:SC2% C2, %Table:SB1% B1
-    WHERE C2_FILIAL = %xFilial:SC2% AND
-    C2_NUM + C2_ITEM + C2_SEQUEN BETWEEN %Exp:MV_PAR01% AND %Exp:MV_PAR02% AND
-    C2.%NOTDEL% AND
-    B1_FILIAL = C2_FILIAL AND
-    B1_COD = C2_PRODUTO AND
-    B1.%NOTDEL%
+    
+    FROM    %Table:SC2% C2, 
+            %Table:SB1% B1
+    
+    WHERE   C2_FILIAL = %xFilial:SC2%   AND
+            C2_NUM + C2_ITEM + C2_SEQUEN BETWEEN %Exp:MV_PAR01% AND %Exp:MV_PAR02% AND
+            C2.%NOTDEL%                 AND
+            B1_FILIAL = %xFilial:SB1%   AND
+            B1_COD = C2_PRODUTO         AND
+            B1.%NOTDEL%
 
     ENDSQL
 

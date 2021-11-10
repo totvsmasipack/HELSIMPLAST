@@ -43,19 +43,19 @@ Local nCont     := 0
         SELECT	D1_DOC, D1_SERIE, D1_FORNECE, D1_LOJA, A2_NOME,
                 D1_COD, B1_DESC, D1_QUANT, D1_LOTEFOR
         FROM	%Table:SD1% D1, %Table:SB1% B1, %Table:SA2% A2
-        WHERE	D1_FILIAL   = %xFilial:SD1%  AND
-                D1_DOC      = %Exp:MV_PAR01% AND
-                D1_SERIE    = %Exp:MV_PAR02% AND
-                D1_FORNECE  = %Exp:MV_PAR03% AND
-                D1_LOJA     = %Exp:MV_PAR04% AND
-                D1_ITEM BETWEEN %Exp:MV_PAR05% AND %Exp:MV_PAR06% AND
-                D1.%NOTDEL%                  AND
-                B1_FILIAL = D1_FILIAL        AND
-                B1_COD = D1_COD              AND
-                B1.%NOTDEL%                  AND
-                A2_FILIAL   = %xFilial:SA2%  AND
-                A2_COD      = D1_FORNECE     AND
-                A2_LOJA     = D1_LOJA        AND
+        WHERE	D1_FILIAL   = %xFilial:SD1%		AND
+                D1_DOC      = %Exp:MV_PAR01%	AND
+                D1_SERIE    = %Exp:MV_PAR02%	AND
+                D1_FORNECE  = %Exp:MV_PAR03%	AND
+                D1_LOJA     = %Exp:MV_PAR04%	AND
+                D1_ITEM		BETWEEN %Exp:MV_PAR05% AND %Exp:MV_PAR06% AND
+                D1.%NOTDEL%						AND
+                B1_FILIAL   = %xFilial:SB1%		AND
+                B1_COD		= D1_COD			AND
+                B1.%NOTDEL%						AND
+                A2_FILIAL   = %xFilial:SA2%		AND
+                A2_COD      = D1_FORNECE		AND
+                A2_LOJA     = D1_LOJA			AND
                 A2.%NOTDEL%
     ENDSQL
 
