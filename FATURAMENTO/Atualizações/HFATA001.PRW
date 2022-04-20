@@ -113,7 +113,7 @@ Private lMsErroAuto := .F.
 			AADD(_aLinha, {"C6_PRCVEN"	,	(_cAlias)->C6_PRCVEN	, Nil})
 			AADD(_aLinha, {"C6_VALOR"	,	(_cAlias)->C6_VALOR		, Nil})
 			AADD(_aLinha, {"C6_QTDLIB"	,	0						, Nil})
-			AADD(_aLinha, {"C6_TES"		,	(_cAlias)->C6_TES		, Nil})
+			AADD(_aLinha, {"C6_TES"		,	'9XX'					, Nil})
 			AADD(_aLinha, {"C6_DESCONT"	,	(_cAlias)->C6_DESCONT	, Nil})
 			AADD(_aLinha, {"C6_VALDESC"	,	(_cAlias)->C6_VALDESC	, Nil})
 			
