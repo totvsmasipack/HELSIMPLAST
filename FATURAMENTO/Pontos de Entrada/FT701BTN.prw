@@ -62,7 +62,15 @@ User Function FT701BTN()
         EndIf 
     EndIf 
 
+    
     aReturn := { "Emissao de Nota?", {|| procprod()} }
+
+    //Adiciono opção de reimprimir somente para pedidos finalizados.
+    If (!Empty(SL1->L1_DOC) .OR. !Empty(SL1->L1_DOCPED) .OR. !Empty(SL1->L1_PEDRES) ) .AND.  !ALLTRIM(SL1->L1_NSO) == "P3"
+        aReturn := { "Reimprimir Cupom", {|| u_HELSR001(1)} }
+    Else 
+        aReturn := { "Emissao de Nota?", {|| procprod()} }        
+    EndIf 
 
 Return aReturn 
 
