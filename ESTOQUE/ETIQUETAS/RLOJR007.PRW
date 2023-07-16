@@ -41,7 +41,7 @@ Local nCont     := 0
     BEGINSQL ALIAS cAlias
     
     SELECT	C2_NUM + C2_ITEM + C2_SEQUEN AS OP,
-    		C2_PRODUTO, B1_DESC, B1_QE
+    		C2_PRODUTO, B1_DESC, B1_QE, B1_CODBAR
     
     FROM    %Table:SC2% C2, 
             %Table:SB1% B1
@@ -51,6 +51,7 @@ Local nCont     := 0
             C2.%NOTDEL%                 AND
             B1_FILIAL = %xFilial:SB1%   AND
             B1_COD = C2_PRODUTO         AND
+
             B1.%NOTDEL%
 
     ENDSQL
@@ -69,7 +70,8 @@ Local nCont     := 0
                 MSCBBEGIN(1,4)
 
                 MSCBBOX(03,03,98,46,5)
-                MSCBSAY(05,40,"NUM. OP: " + (cAlias)->OP,"N","3","01","01")		
+                MSCBSAYBAR(60,33,AllTrim((cAlias)->B1_CODBAR),"N","MB07",8.36,.F.,.T.,.F.,,2,1)
+                MSCBSAY(05,40,"NUM. OP: " + (cAlias)->OP,"N","3","01","01")	
                 MSCBSAY(05,33,"PRODUTO: " + ALLTRIM((cAlias)->C2_PRODUTO),"N","3","01","01")	
                 MSCBSAY(05,27,"DESCRI.: " + SUBSTR(ALLTRIM((cAlias)->B1_DESC),1,35),"N","3","01","01")
                 MSCBSAY(05,20,"DATA: _____/" + StrZero(MONTH(dDataBase),2) + "/" + cValToChar(YEAR(dDataBase)) ,"N","3","01","01")

@@ -52,7 +52,7 @@ Local nCont		:= 0
 	
 	BEGINSQL ALIAS cAlsTMP
 		
-		SELECT	SC5.C5_NUM, SC5.C5_CLIENTE, SC5.C5_LOJAENT, SC5.C5_PESOL, SC5.C5_PBRUTO, SA1.A1_CGC, SB1.B1_COD,
+		SELECT	SC5.C5_NUM, SC5.C5_CLIENTE, SC5.C5_LOJAENT, SC5.C5_PESOL, SC5.C5_PBRUTO, SA1.A1_CGC, SB1.B1_COD,  SB1.B1_CODBAR, 
 				SA1.A1_NREDUZ, SC6.C6_ITEM, SC6.C6_PRODUTO, SB1.B1_LOCAL, SB1.B1_DESC, SB1.B1_QE, SC6.C6_QTDVEN
 		
 		FROM %Table:SC5% SC5
@@ -88,6 +88,7 @@ Local nCont		:= 0
 				MSCBBEGIN(1,4)
 
 				MSCBBOX(03,03,98,46,5)
+				MSCBSAYBAR(70,27,AllTrim((cAlsTMP)->B1_CODBAR),"N","MB07",8.36,.F.,.T.,.F.,,2,1)
 				MSCBSAY(05	,40	,ALLTRIM(SM0->M0_NOMECOM)								,'N'	,'3'	,'01'	,'01')
 				MSCBSAY(05	,33	,'CLIENTE: ' + ALLTRIM((cAlsTMP)->(A1_NREDUZ))			,'N'	,'3'	,'01'	,'01')
 				MSCBSAY(05	,27	,'PRODUTO: ' + ALLTRIM((cAlsTMP)->B1_COD)				,'N'	,'3'	,'01'	,'01')
@@ -97,6 +98,7 @@ Local nCont		:= 0
 				MSCBSAY(32	,13	,'PESO.: '   + AllTrim(cValToChar(MV_PAR04)) + ' KG'	,'N'	,'3'	,'01'	,'01')
 				MSCBSAY(65	,13	,'FABR.: '	 + DTOC(dDataBase)							,'N'	,'3'	,'01'	,'01')
 				MSCBSAY(05	,05	,'MANTER PROTEGIDO DO SOL, UMIDADE E POEIRA'			,'N'	,'3'	,'01'	,'01')
+				
 				
 				MSCBEND()
             
