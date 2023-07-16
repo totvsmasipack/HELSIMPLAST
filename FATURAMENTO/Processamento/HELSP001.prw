@@ -13,13 +13,34 @@
     @see (links_or_references)
 /*/
 
-User Function HELSP001()
+User Function HELSP001(nOpc)
 
-    Local _nPosLocal := aScan( aHeaderDet, { |x| Trim(x[2]) == 'LR_LOCAL' })
-    Local _cLocal    := SUPERGETMV( 'ES_XLJLCPD',, '50') //Armazem padrao para loja
+    Local _nPosLocal   := 0
+    Local _cLocalLJ    := SUPERGETMV( 'ES_XLJLCPD',, '50') //Armazem padrao para loja
+    Local _cLocalCol   := SUPERGETMV( 'ES_XLJLCOL',, '51') //Armazem padrao para encomendas colaborares
+    Local _cUserCol    := SUPERGETMV( 'ES_XCOLUSR',, '001888') //Usuários que atendem no balcão 
+    Local _cLocal      := ''
 
-    If Len(aColsDet) >= n
-        aColsDet[n][_nPosLocal] := _cLocal //Código do Armazém
-    Endif
-	                                                                                                               
+    Default nOpc := 0
+
+    If nOpc == 0    
+        _nPosLocal := aScan( aHeaderDet, { |x| Trim(x[2]) == 'LR_LOCAL' })
+        If Len(aColsDet) >= n
+            If RETCODUSR() $ _cUserCol
+                
+                aColsDet[n][_nPosLocal] := _cLocalCol //Código do Armazém
+                _cLocal := _cLocalCol
+            Else 
+                aColsDet[n][_nPosLocal] := _cLocalLJ //Código do Armazém
+                _cLocal := _cLocalLJ
+            EndIf 
+        Endif
+    Else 
+        If RETCODUSR() $ _cUserCol
+            _cLocal := _cLocalCol
+        Else 
+            _cLocal := _cLocalLJ
+        EndIf 
+    EndIf 
+
 Return _cLocal

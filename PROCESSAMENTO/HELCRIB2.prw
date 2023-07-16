@@ -6168,6 +6168,9 @@ AADD(aProd,'PA1108040000')
 AADD(aProd,'PA1108050000')
 AADD(aProd,'PA1108060000')
 AADD(aProd,'PA39472139002')
+AADD(aProd,'PA0622020623')
+AADD(aProd,'PA0801030993')
+
 
 
 
@@ -6181,8 +6184,8 @@ SB1->(DbSetOrder(1))
 
 For nx := 1 to len(aProd)
 
-    If !(SB2->(MsSeek(xFilial("SB2")+'50'+aProd[nx])))
-        CRIASB2(aProd[nx],'50')
+    If !(SB2->(MsSeek(xFilial("SB2")+'51'+aProd[nx])))
+        CRIASB2(aProd[nx],'51')
     EndIf
     
     If !(SB2->(MsSeek(xFilial("SB2")+'01'+aProd[nx])))
