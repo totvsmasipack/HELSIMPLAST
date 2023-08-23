@@ -17,10 +17,10 @@ User Function HELCRIAOP()
 	Local cProd		:= M->D3_COD
 	Local cLocal	:= space(2)
 	Local nQuant	:= 0
-	Local cRet		:= ""
+	Local cRet		:= M->D3_OP
 	Local cArea 	:= getArea()
 
-	If funname()=='MATA250'
+	If funname()=='MATA250' .AND. EMPTY( M->D3_OP )
 
 		if Select("c2TMP") > 0
 		c2TMP->(dbCloseArea())
@@ -112,7 +112,8 @@ Static Function HELProce(cProd, cLocal, nQuant )
 		{'C2_DATPRI'	,Date()				,NIL},;
 		{'C2_DATPRF'	,Date()				,NIL},;
 		{'C2_OPERAC'	,"01"				,NIL},;
-		{'C2_EMISSAO'	,Date()				,NIL}}
+		{'C2_EMISSAO'	,Date()				,NIL},;
+		{'AUTEXPLODE' , "S"                  ,NIL}}
 
 	nModulo := 4
 	msExecAuto({|x,Y| Mata650(x,Y)},aMata650,nOpc)
