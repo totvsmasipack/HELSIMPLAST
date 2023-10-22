@@ -54,6 +54,9 @@ User Function FTVD7001()
 
     lExistDesc := (aScan( aCols, { |x| x[nPosvlDesc] > 0 }) > 0 ) .or.  (aScan( aCols, { |x| x[nPosDesc] > 0 }) > 0)
 
+    //Função para garantir que o numero da nota fiscal não está se repetindo.
+    valnumnf()
+
     If (lExistDesc .OR. aScan( ADESCONTO, { |x| x > 0 }) > 0) .and. Empty(LQ_XMOTDES)
          If Empty(M->LQ_XMAT)
             lRet := .F.
@@ -115,3 +118,59 @@ User Function FTVD7001()
     RestArea(aArea)
 
 Return(lRet)
+
+
+/*/{Protheus.doc} valnumnf
+    Função para garantir se o sistema não vai repetir o numero da nota
+    foi necessaria a criação pois em 20/10/2023 o sistema passou a apresentar um erro intermitente
+    onde o numero da nota na SX5 não era incrementado ao gerar uma nota, causando erro de nota existente na próxima emissão.
+    @type  Static Function
+    @author Fernando Corrêa (DS2U)
+    @since 21/10/2023
+    @version version
+    @param param_name, param_type, param_descr
+    @return return_var, return_type, return_description
+    @example
+    (examples)
+    @see (links_or_references)
+/*/
+Static Function valnumnf()
+
+    Local cSerie   := SUPERGETMV( 'MV_LOJANF ',, 'LJ',  )
+    Local cQuery   := ''
+    Local cAliasL1 := GetNextAlias()
+    Local cDocL1   := ''
+    Local cNewDoc  := ''
+
+    cQuery := " SELECT TOP 1 SL1.L1_DOC AS DOC "
+    cQuery += "	FROM " + RETSQLNAME('SL1') + " SL1 "
+    cQuery += "	WHERE SL1.L1_FILIAL = '" + xFilial("SL1") + "' "
+    cQuery += "	AND SL1.D_E_L_E_T_= '' "
+    cQuery += "	ORDER BY L1_DOC DESC "
+
+    //--Cria uma tabela temporária com as informações da query				
+    dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAliasL1,.F.,.T.)
+
+    If (cAliasL1)->(!Eof())
+        cDocL1 := (cAliasL1)->DOC
+    EndIf 
+
+    DbSelectArea('SX5')
+    SX5->(DbSetorder(1))
+    If !Empty(cDocL1)
+        If SX5->(MsSeek(xFilial("SX5")+'01'+cSerie))
+            If SX5->X5_DESCRI <= cDocL1
+                cNewDoc := Soma1(cDocL1)
+                If RecLock('SX5',.F.)
+                    SX5->X5_DESCRI  := cNewDoc
+                    SX5->X5_DESCSPA := cNewDoc
+                    SX5->X5_DESCENG := cNewDoc
+                    SX5->(MSUNLOCK())
+                EndIf 
+            EndIf 
+        EndIf  
+    EndIf 
+
+    (cAliasL1)->(DBCLOSEAREA())
+
+Return 
