@@ -13,36 +13,34 @@
 	@see (links_or_references)
 /*/
 
-User Function HLojr780()
+User Function HLojr780() 
 Local oReport
 Local aArea := GetArea()      
 
-If !TRepInUse()
-	MsgAlert("AtenГЦo, esse relatСrio somente serА exibido no Modo de RelatСrio Personalizado." +CHR(10)+CHR(13)+;
-			"Altere o parБmetro MV_TREPORT para 2 e o relatСrio poderА ser emitido normalmente")
-Else
-	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-	//Ё Variaveis utilizadas para parametros						 Ё
-	//Ё mv_par01				 // De Grupo						 Ё
-	//Ё mv_par02				 // Ate o Grupo						 Ё
-	//Ё mv_par03				 // De Data 						 Ё
-	//Ё mv_par04				 // Ate a Data 						 Ё
-	//Ё mv_par05				 // De Produto 						 Ё
-	//Ё mv_par06				 // Ate o Produto 					 Ё
-	//Ё mv_par07				 // Ranking p/ Preco ou Quant.		 Ё
-	//Ё mv_par08				 // Classificacao s 10 Mais,...      Ё
-	//Ё         				 // ...os 20 mais,.                  Ё
-	//Ё mv_par09				 // Considera as devolucoes para a   Ё
-	//Ё         				 // geracao do ranking               Ё
-	//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-	Pergunte("LJR780",.F.)
+//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+//Ё Variaveis utilizadas para parametros						 Ё
+//Ё mv_par01				 // De Grupo						 Ё
+//Ё mv_par02				 // Ate o Grupo						 Ё
+//Ё mv_par03				 // De Data 						 Ё
+//Ё mv_par04				 // Ate a Data 						 Ё
+//Ё mv_par05				 // De Produto 						 Ё
+//Ё mv_par06				 // Ate o Produto 					 Ё
+//Ё mv_par07				 // Ranking p/ Preco ou Quant.		 Ё
+//Ё mv_par08				 // Classificacao s 10 Mais,...      Ё
+//Ё         				 // ...os 20 mais,.                  Ё
+//Ё mv_par09				 // Considera as devolucoes para a   Ё
+//Ё         				 // geracao do ranking      		 Ё 
+//Ё mv_par10				 // Filtra por Operador				 Ё
+//Ё mv_par11				 // De Operador						 Ё					
+//Ё mv_par12				 // Ate Operador					 Ё					
+//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+Pergunte("HLOJR780",.T.)
 
-	//здддддддддддддддддддддд©
-	//ЁInterface de impressaoЁ
-	//юдддддддддддддддддддддды
-	oReport := Ljr780RptDef()
-	oReport:PrintDialog()
-EndIf
+//здддддддддддддддддддддд©
+//ЁInterface de impressaoЁ
+//юдддддддддддддддддддддды
+oReport := Ljr780RptDef()
+oReport:PrintDialog()
 
 RestArea( aArea )
 Return
@@ -78,7 +76,7 @@ Local lTop      := .F.                        		// Verifica se esta usando o Top
                                         
 // Ranking de Produtos
 //"Este programa irА emitir um Ranking de Produtos por" "PreГo ou Quantidade em Moeda Corrente."
-oReport := TReport():New("HLOJR780",'RANKING DE PRODUTOS',"LJR780",{|oReport| Ljr780PrtRpt(oReport,cAlias1)}, 'Este programa irА emitir um Ranking de Produtos por' + ' PreГo ou Quantidade em Moeda Corrente.' )
+oReport := TReport():New("HLOJR780",'RANKING DE PRODUTOS','HLOJR780',{|oReport| Ljr780PrtRpt(oReport,cAlias1)}, 'Este programa irА emitir um Ranking de Produtos por' + ' PreГo ou Quantidade em Moeda Corrente.' )
 
 //зддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 //ЁDefine a secao1 do relatorio, informando que o arquivo principal utlizado eh o SL2 e o complementar o SB1Ё
@@ -95,7 +93,10 @@ TRCell():New(oSection1,"B1_DESC"	,"SB1")
 TRCell():New(oSection1,"QUANT"		,cAlias1,'Quantidade',"@E 999,999.99"		,9	,NIL, If(cPaisLoc == "BRA" .And. lTop, Nil, {|| Lj780QtdCalc(1) }) ) // "Quantidade")
 TRCell():New(oSection1,"B1_UM"		,"SB1")
 TRCell():New(oSection1,"VALOR"		,cAlias1,'Valor',"@E 999,999,999.9999"	,15 ,NIL, If(cPaisLoc == "BRA" .And. lTop, Nil, {|| Lj780QtdCalc(2) }) ) // "Valor"
-
+IF MV_PAR10 == 1
+	TRCell():New(oSection1,"L1_OPERADO"	,cAlias1,'Cod Operador',"@!",15 ,NIL, If(cPaisLoc == "BRA" .And. lTop, Nil, {|| Lj780QtdCalc(2) }) ) // "Cod Operador"
+	TRCell():New(oSection1,"OPERADOR"	,cAlias1,'Operador',"@!",15 ,NIL, If(cPaisLoc == "BRA" .And. lTop, Nil, {|| Lj780QtdCalc(2) }) ) // "Operador"
+EndIf 
 TRFunction():New(oSection1:Cell("QUANT"),,"SUM",,,,,,.F.)		// Ultimo parametro informa que nao deve imprimir o total no final da secao, somente no final do relatorio
 TRFunction():New(oSection1:Cell("VALOR"),,"SUM",,,,,,.F.)
 
@@ -134,6 +135,12 @@ Local aIndexKey := {}                        // Indice do arquivo temporАrio
 Local nQtdeRegs := 0								// Contador para delimitar o tamanho da regua de progressao
 Local cTesRel   := SUPERGETMV( 'ES_HELTSLJ', , "501",  ) //Define a tes que o relatСrio irА considerar.
 Local oTempTable:= Nil								//Objeto tabela temporaria
+Local cOperado	:= ""								//CondiГЦo sobre o parametro de Filtro por Operador 
+Local cSelect   := ""
+Local cSelect2  := ""
+Local cSelect3  := ""
+Local cGroup    := "" 
+
             
 #IFDEF TOP
 
@@ -161,6 +168,20 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 		cOrderBy := "%QUANT DESC, COD%"
 	EndIf	
 
+	IF MV_PAR10 == 1
+		cOperado := "% L1_OPERADO >= '" + %exp:mv_par11% + "' AND L1_OPERADO <= '" + %exp:mv_par12% + "' AND %"
+		cSelect  := "% B1_COD COD,		B1_DESC,	B1_UM,	SUM(L2_QUANT) QUANT,	SUM(L2_VLRITEM+L2_VALIPI) VALOR , L1_OPERADO, "
+		cSelect  += " ( SELECT  A6_NOME FROM " + RetSqlName('SA6') + " WHERE A6_FILIAL = '" + xFilial("SA6")  + "' AND A6_COD = L1_OPERADO AND D_E_L_E_T_ = '') AS OPERADOR %"
+		cGroup   := "% B1_COD, B1_DESC, B1_UM, L2_PRODUTO , L1_OPERADO %"
+		cSelect2 := "% D1_COD COD, 	B1_DESC,	B1_UM,	(-SUM(D1_QUANT)) QUANT, (-SUM(D1_TOTAL+D1_VALIPI)) VALOR, L1_OPERADO %"
+		cSelect3 := "% D1_COD COD, 	B1_DESC,	B1_UM,	0 QUANT,	0 VALOR, L1_OPERADO %"
+	else	
+		cSelect  := "% B1_COD COD,		B1_DESC,	B1_UM,	SUM(L2_QUANT) QUANT,	SUM(L2_VLRITEM+L2_VALIPI) VALOR  %"
+		cOperado := "%%"
+		cGroup   := "% B1_COD, B1_DESC, B1_UM, L2_PRODUTO  %"
+		cSelect2 := "% D1_COD COD, 	B1_DESC,	B1_UM,	(-SUM(D1_QUANT)) QUANT, (-SUM(D1_TOTAL+D1_VALIPI)) VALOR  %"
+		cSelect3 := "% D1_COD COD, 	B1_DESC,	B1_UM,	0 QUANT,	0 VALOR %"
+	ENDIF
 
 	//здддддддддддддддддддд©
 	//ЁInicializa a secao 1Ё
@@ -173,7 +194,7 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 		//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддды 
 
 		BeginSql alias cAlias1
-			SELECT	B1_COD COD,		B1_DESC,	B1_UM,	SUM(L2_QUANT) QUANT,	SUM(L2_VLRITEM+L2_VALIPI) VALOR 
+			SELECT  %exp:cSelect%	
 		
 			FROM %table:SB1% SB1,%table:SF4% SF4,%table:SL1% SL1,%table:SL2% SL2 			
 
@@ -197,12 +218,13 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 					L2_PRODUTO	=	B1_COD					AND
 				    (L2_VENDIDO = 	'S'  OR (L2_ENTREGA = '3' AND L2_PEDRES <> ' ' AND C6_QTDVEN = C6_QTDENT)) AND
 					F4_CODIGO	=	%exp:cTesRel%			AND
+					%exp:cOperado%
 					SL2.%notDel%							AND
 					%exp:cPart%
 					SF4.%notDel%							AND
 					SB1.%notDel%							
 	
-			GROUP BY B1_COD, B1_DESC, B1_UM, L2_PRODUTO
+			GROUP BY %exp:cGroup%	
 			ORDER BY %exp:cOrderBy%	
 
 		EndSql
@@ -215,10 +237,10 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 			BeginSql alias cAlias1
 			
-				SELECT COD,		B1_DESC,	B1_UM,	SUM(QUANT) QUANT,	SUM(VALOR) VALOR 
+				SELECT  %exp:cSelect%	
 				FROM (
 				
-					SELECT	B1_COD COD,		B1_DESC,	B1_UM,	SUM(L2_QUANT) QUANT,	SUM(L2_VLRITEM+L2_VALIPI) VALOR
+					SELECT	 %exp:cSelect%	
 					FROM %table:SB1% SB1, %table:SF4% SF4, %table:SL1% SL1, %table:SL2% SL2
 					LEFT JOIN %table:SC6% SC6 ON (C6_FILIAL=L2_FILIAL AND C6_NUM=L2_PEDRES AND SC6.%notDel%) 
 					WHERE	B1_FILIAL		=	%xfilial:SB1%			AND
@@ -238,6 +260,7 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 							L2_TES			=	F4_CODIGO				AND
 							L2_PRODUTO		=	B1_COD					AND
 						    (L2_VENDIDO 	= 	'S'  OR (L2_ENTREGA = '3' AND L2_PEDRES <> ' ' AND C6_QTDVEN = C6_QTDENT)) AND
+							%exp:cOperado%
 							F4_CODIGO	    =	%exp:cTesRel%			AND
 							%exp:cPart%
 							SL1.%notDel%								AND
@@ -246,11 +269,11 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 							SB1.%notDel%
 							
 							
-					GROUP BY B1_COD, B1_DESC, B1_UM
+					GROUP BY B1_COD, B1_DESC, B1_UM, L1_OPERADO
 					
 					UNION
 					
-					SELECT	D1_COD COD, 	B1_DESC,	B1_UM,	(-SUM(D1_QUANT)) QUANT, (-SUM(D1_TOTAL+D1_VALIPI)) VALOR
+					SELECT	%exp:cSelect2%	
 					FROM %table:SD1% SD1, %table:SB1% SB1
 					WHERE 	D1_FILIAL		=  %xfilial:SD1% 			AND
 					  	 	B1_FILIAL		=  %xfilial:SB1% 			AND
@@ -282,7 +305,7 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 			//юдддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 			BeginSql alias cAlias1
 			
-				SELECT	B1_COD COD,		B1_DESC,	B1_UM,	SUM(L2_QUANT) QUANT,	SUM(L2_VLRITEM+L2_VALIPI) VALOR 
+				SELECT	%exp:cSelect%	
 			
 				FROM %table:SB1% SB1,%table:SL2% SL2,%table:SF4% SF4, %table:SL1% SL1
 				WHERE	B1_FILIAL	=	%xfilial:SB1%			AND	
@@ -304,16 +327,17 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 						L2_PRODUTO	=	B1_COD					AND
 						L2_VENDIDO	=	'S'						AND
 						F4_CODIGO	=	%exp:cTesRel%			AND
+						%exp:cOperado%
 						SL2.%notDel%							AND
 						%exp:cPart%
 						SF4.%notDel%							AND
 						SB1.%notDel%							
 		
-				GROUP BY B1_COD, B1_DESC, B1_UM
+				GROUP BY B1_COD, B1_DESC, B1_UM, L1_OPERADO
 		
 				UNION
 		
-				SELECT	D1_COD COD, 	B1_DESC,	B1_UM,	0 QUANT,	0 VALOR
+				SELECT	%exp:cSelect3%	
 				
 				FROM %table:SD1% SD1,%table:SB1% SB1,%table:SL2% SL2,%table:SF4% SF4
 				WHERE	D1_FILIAL	=	%xfilial:SD1%			AND
@@ -403,7 +427,10 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 	AADD(aCampos,{"QUANT" ,"N",aTam[1] + 4,aTam[2]})
 	aTam	:= TamSX3( "L2_VLRITEM" )
 	AADD(aCampos,{"VALOR" ,"N",aTam[1] + 4,aTam[2]})
+	aTam	:= TamSX3( "L1_OPERADO" )
+	AADD(aCampos,{"OPERADOR" ,"N",aTam[1] + 4,aTam[2]})
 	cArqTrb := CriaTrab( Nil,.F. )
+	
 	//Cria tabela temporaria
 	oTempTable := LjCrTmpTbl(cAlias1, aCampos, aIndexKey)
 
@@ -490,6 +517,7 @@ Local oTempTable:= Nil								//Objeto tabela temporaria
 				(cAlias1)->COD 		:= SB1->B1_COD
 				(cAlias1)->QUANT   	:= nQuant
 				(cAlias1)->VALOR   	:= nValor
+				(cAlias1)->OPERADO  := L1_OPERADO
 			(cAlias1)->( MsUnLock() )
 
 			Aadd(aProd,SB1->B1_COD)
