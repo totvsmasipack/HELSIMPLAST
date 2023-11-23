@@ -4,8 +4,6 @@
 #INCLUDE "MSMGADD.CH"
 #INCLUDE "TCBROWSE.CH"
 
-
-
 /*/{Protheus.doc} User Function FT701BTN 
     Ponto de entrada para adicionar botão dentro do atendimento do venda assistida.
     https://tdn.totvs.com/pages/releaseview.action?pageId=6784519
@@ -23,48 +21,7 @@
 User Function FT701BTN()
 
     Local aReturn := {}
-    Local aCpos   := {}
-    Local nx      := 0
-
-    DbSelectArea("ZZ3")
-    ZZ3->(DbSetOrder(1))
-    ZZ3->(DbGoTop())
-
-    If ZZ3->ZZ3_DTCARG != Date()
-        
-        querysra(@aCpos)
-
-        If Len(aCpos) > 0
-            DbSelectArea("ZZ3")
-            ZZ3->(DbSetOrder(1))
-            ZZ3->(DbGoTop())
-            For nx := 1 To Len(aCpos)
-                IF !(ZZ3->(MsSeek(xFilial("ZZ3")+aCpos[nx][1] + aCpos[nx][2])))
-                    If RecLock("ZZ3",.T.)
-                        ZZ3->ZZ3_FILIAL  := xFilial("ZZ3")
-                        ZZ3->ZZ3_CODEMP  := aCpos[nx][1]
-                        ZZ3->ZZ3_MAT     := aCpos[nx][2]
-                        ZZ3->ZZ3_NOME    := aCpos[nx][3]
-                        ZZ3->ZZ3_EMPRES  := aCpos[nx][4]
-                        ZZ3->ZZ3_DTCARG  := Date()
-                        ZZ3->ZZ3_CHAVE   := aCpos[nx][1] + aCpos[nx][2]
-                        ZZ3->ZZ3_DEPTO   := aCpos[nx][5]
-                        ZZ3->ZZ3_DPTODE  := aCpos[nx][6]
-                        ZZ3->(MSUNLOCK())
-                    EndIf 
-                Else 
-                    If RecLock("ZZ3",.F.)
-                        ZZ3->ZZ3_DTCARG  := Date()
-                        ZZ3->(MSUNLOCK())
-                    EndIf 
-                EndIf 
-            Next nx  
-        EndIf 
-    EndIf 
-
-    
-    aReturn := { "Emissao de Nota?", {|| procprod()} }
-
+       
     //Adiciono opção de reimprimir somente para pedidos finalizados.
     If (!Empty(SL1->L1_DOC) .OR. !Empty(SL1->L1_DOCPED) .OR. !Empty(SL1->L1_PEDRES) ) .AND.  !ALLTRIM(SL1->L1_NSO) == "P3"
         aReturn := { "Reimprimir Cupom", {|| u_HELSR001(1)} }
@@ -74,77 +31,18 @@ User Function FT701BTN()
 
 Return aReturn 
 
-
-
-
-Static Function querysra(aCpos)
-
-    Local cQuery := ""
-    Local cAlias := GetNextAlias()
-    local cDB  := "MSSQL/RH" // alterar o alias/dsn para o banco/conexão que está utilizando
-    local cSrv := "localhost" // alterar para o ip do DbAccess
-    Local nPort := 6400
-    
-    nHwnd := TCLink(cDB, cSrv, nPort)
-    
-    if nHwnd >= 0
-        
-        cQuery := " SELECT '01' AS COD_EMP,'MASIPACK' AS EMPRESA, RA_FILIAL, RA_MAT, RA_NOME, RA_DEPTO, QB_DESCRIC " + CRLF
-        cQuery += " FROM SRA010 SRA " + CRLF
-        cQuery += " LEFT JOIN SQB010 SQB " + CRLF
-	    cQuery += " ON QB_FILIAL = '' AND QB_DEPTO = RA_DEPTO AND SQB.D_E_L_E_T_ = '' " + CRLF
-        cQuery += " WHERE SRA.D_E_L_E_T_ = '' " + CRLF
-
-        cQuery += " union all " + CRLF
-
-        cQuery += " SELECT  '10' AS COD_EMP, 'FABRIMA'   AS EMPRESA, RA_FILIAL, RA_MAT, RA_NOME, RA_CC AS 'RA_DEPTO', CTT_DESC01 QB_DESCRIC " + CRLF
-        cQuery += " 	FROM SRA100 SRA " + CRLF
-         cQuery += "LEFT JOIN CTT100 CTT " + CRLF
-        cQuery += "ON CTT_FILIAL = RA_FILIAL AND CTT_CUSTO = RA_CC AND CTT.D_E_L_E_T_ = '' " + CRLF
-        cQuery += " WHERE SRA.D_E_L_E_T_ = '' " + CRLF
-
-        cQuery += " union all " + CRLF
-
-        cQuery += " SELECT  '15' AS COD_EMP, 'MASITUBOS'  AS EMPRESA, RA_FILIAL, RA_MAT, RA_NOME, RA_CC AS 'RA_DEPTO', CTT_DESC01 QB_DESCRIC" + CRLF
-        cQuery += " 	FROM SRA150 SRA " + CRLF
-         cQuery += "LEFT JOIN CTT150 CTT " + CRLF
-        cQuery += "ON CTT_FILIAL = RA_FILIAL AND CTT_CUSTO = RA_CC AND CTT.D_E_L_E_T_ = '' " + CRLF
-        cQuery += " WHERE SRA.D_E_L_E_T_ = '' " + CRLF
-
-        cQuery += " union all " + CRLF
-
-        cQuery += " SELECT '25' AS COD_EMP, 'CASA HELSIM'  AS EMPRESA, RA_FILIAL, RA_MAT, RA_NOME, RA_CC AS 'RA_DEPTO', CTT_DESC01 QB_DESCRIC  " + CRLF
-        cQuery += " 	FROM SRA250 SRA " + CRLF
-         cQuery += "LEFT JOIN CTT250 CTT " + CRLF
-        cQuery += "ON CTT_FILIAL = RA_FILIAL AND CTT_CUSTO = RA_CC AND CTT.D_E_L_E_T_ = '' " + CRLF
-        cQuery += " WHERE SRA.D_E_L_E_T_ = '' " + CRLF
-
-        cQuery += " union all " + CRLF
-
-        cQuery += " SELECT  '55' AS COD_EMP, 'TERCEIROS'  AS EMPRESA, RA_FILIAL, RA_MAT, RA_NOME, RA_CC AS 'RA_DEPTO', CTT_DESC01 QB_DESCRIC " + CRLF
-        cQuery += "FROM SRA550 SRA  " + CRLF
-        cQuery += "LEFT JOIN CTT550 CTT " + CRLF
-        cQuery += "ON CTT_FILIAL = RA_FILIAL AND CTT_CUSTO = RA_CC AND CTT.D_E_L_E_T_ = '' " + CRLF
-        cQuery += " WHERE SRA.D_E_L_E_T_ = ''  " + CRLF
-
-        //--Cria uma tabela temporária com as informações da query				
-        dbUseArea(.T.,"TOPCONN",TcGenQry(,,cQuery),cAlias,.F.,.T.)
-
-        While (cAlias)->(!Eof())
-            aAdd(aCpos,{(cAlias)->COD_EMP, (cAlias)->RA_MAT, (cAlias)->RA_NOME, (cAlias)->EMPRESA, (cAlias)->RA_DEPTO,  (cAlias)->QB_DESCRIC})
-            (cAlias)->(dbSkip())
-        End 
-                                   
-        (cAlias)->(DbCloseArea())
-
-    endif
-   
-    TCUNLink()
-
-Return  
-
-
-
+/*/{Protheus.doc} procprod
+    Função para exibir mensagem de desição sobre alteração de preço
+    @type  Static Function
+    @author DS2U (Fernando Corrêa)
+    @since 20/11/2023
+    @version version
+    @param param_name, param_type, param_descr
+    @return return_var, return_type, return_description
+    @example
+    (examples)
+    @see (links_or_references)
+/*/
 
 Static Function procprod()
 
@@ -166,6 +64,19 @@ EndIf
 n := nLinBkp
 
 Return 
+
+/*/{Protheus.doc} procprod
+    Função que altera o preço de todos os itens do pedido para o preço 2 da tabela
+    @type  Static Function
+    @author DS2U (Fernando Corrêa)
+    @since 20/11/2023
+    @version version
+    @param param_name, param_type, param_descr
+    @return return_var, return_type, return_description
+    @example
+    (examples)
+    @see (links_or_references)
+/*/
 
 Static Function altpreco()
 
@@ -202,30 +113,6 @@ Local nPrecoTab		:= 0
 Local lAlterProd	:= .F.
 Local lFtvdVer12	:= LjFTVD()	//Verifica se é Release 11.7 e o FunName é FATA701 - Compatibilização Venda Direta x Venda Assisitida
 
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³Verica Permissões do Usuário³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-/*
-If !(ChkPsw( 32 ))
-	Return .F.
-Endif
-
-If HasTemplate("PCL")
-	nPosBico	:=	aPosCpo[Ascan(aPosCpo,{|x| AllTrim(Upper(x[1])) == "LR_BICO"})][2]		// Posicao do bico
-	DbSelectArea("LEI")
-	LEI->(DbSetOrder(2))
-
-	// Filial + Produto + Bico , usa só o produto pois localizando-o na tabela já é o suficiente para barrar
-	If LEI->(MsSeek( xFilial("LEI") + aCols[n][nPosCod] + aCols[n][nPosBico]))
-		MsgInfo( STR0084 )//"De acordo com o Requisito XXXV da Legislação PAF-ECF no Ato Cotepe 0608 : Abastecimentos Importados nao podem ter um valor alterado."
-		Return .F.
-	EndIf
-EndIf
-*/
-//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//³ Monta o array aTabelas                                                   ³
-//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 
 DbSelectArea("SB0")
 DbSetOrder(1)	// Filial + Cod
@@ -261,39 +148,6 @@ If MsSeek( xFilial("SB0") + aCols[n][nPosProd] )
             Endif
         Endif
     Next nX
-Endif
-
-/*
-
-If Len(aTabelas) > 0
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Desabilita as teclas de atalho                                           ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	Lj7SetKeys(.F.)
-
-	DEFINE MSDIALOG oDlgTabela TITLE STR0024	FROM 0,0 TO 14.5,35 OF oDlgVA //"Tabela de Preços"
-
-	oTabelas := TCBROWSE():New(5,5,100,100, Nil, Nil, {30,30}, oDlgTabela, Nil, Nil, Nil, Nil,bTabDlbClick,,,,,,,,, .T. )
-
-	oTabelas:SetArray( aTabelas )
-	ADD COLUMN TO oTabelas HEADER STR0025 	OEM DATA {|| aTabelas[oTabelas:nAt,1] } ALIGN LEFT SIZE 30 PIXELS //"Tabela"
-	ADD COLUMN TO oTabelas HEADER STR0026 	OEM DATA {|| Transform(aTabelas[oTabelas:nAt,2],PesqPict("SB0","B0_PRV1")) } ALIGN LEFT SIZE 30 PIXELS //"Preço"
-	If cPaisLoc <> "BRA"
-	   ADD COLUMN TO oTabelas HEADER STR0032 OEM DATA {|| aTabelas[oTabelas:nAt,3] } ALIGN LEFT SIZE 30 PIXELS //"Moeda"
-	EndIf
-	oTabelas:nFreeze := 1
-
-	DEFINE SBUTTON FROM 006,108 TYPE 1 ACTION (lContinua := .T. , nTabela := Val(aTabelas[oTabelas:nAt,1]) , ;
-	                                           oDlgTabela:End()) ENABLE OF oDlgTabela
-	DEFINE SBUTTON FROM 020,108 TYPE 2 ACTION (oDlgTabela:End()) ENABLE OF oDlgTabela
-
-	ACTIVATE MSDIALOG oDlgTabela CENTERED
-
-	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-	//³ Habilita as teclas de atalho                                             ³
-	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	Lj7SetKeys(.T.)
 Endif
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -354,13 +208,7 @@ If lContinua
 			//³ Acerto das colunas da aColsDet                                              ³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 			aColsDet[n][nPosPrcTab] := &("SB0->B0_PRV"+cTabPad)
-            /*
-			//If lTrcMoeda .AND. !lCenVenda
-			nMoedaPrv := Max(&("SB0->B0_MOEDA" + cTabPad),1)
-			aCols[n][nPosVlUnit]	:= Round(xMoeda(&("SB0->B0_PRV" + cTabPad), nMoedaPrv, nMoedaCor, dDataBase ,;
-			                                         nDecimais+1, NIL, nTxMoeda), nDecimais)
-			//EndIf
-			*/
+       
             Lj7DefTab(.T.)
 
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
