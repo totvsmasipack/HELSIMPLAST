@@ -108,7 +108,7 @@ Static Function querysra(aCpos)
     Local cAlias := GetNextAlias()
     local cDB  := "MSSQL/RH" // alterar o alias/dsn para o banco/conexão que está utilizando
     local cSrv := "localhost" // alterar para o ip do DbAccess
-    Local nPort := 6400
+    Local nPort := 6300
     
     nHwnd := TCLink(cDB, cSrv, nPort)
     
@@ -164,6 +164,6 @@ Static Function querysra(aCpos)
 
     endif
    
-    TCUNLink()
+    TCUNLink(nHwnd)
 
 Return  
