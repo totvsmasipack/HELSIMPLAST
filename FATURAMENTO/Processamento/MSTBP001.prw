@@ -1,4 +1,4 @@
-#INCLUDE "PROTHEUS.CH"
+#INCLUDE "protheus.ch"
 #INCLUDE 'TOPCONN.CH'
 
 /*/{Protheus.doc} MSTBMEN1
@@ -14,6 +14,7 @@ User Function MSTBMEN1()
     Processa( {|| U_MSTBP001() }, "Aguarde...", "Criando Pedido de Venda...",.T.) 
 
 Return NIL
+
 /*/{Protheus.doc} MSTBP001
     (long_description)
     @type  Function - 
@@ -58,18 +59,22 @@ User Function MSTBP001()
     cQuery += ", SB1.B1_ESTOMAX "
     cQuery += ", SB1.B1_UM "
     cQuery += ", SB1.B1_TIPO "
-    cQuery += ", SB1.B1_PRV1 "
+    cQuery += ", SB0.B0_PRV1 "
     cQuery += ", SB1.B1_GRUPO "
+    cQuery += ", SBM.BM_XDEP "
     cQuery += ", SB2.B2_VATU1 "
-    cQuery += ", SB2.B2_LOCAL ""
+    cQuery += ", SB2.B2_LOCAL "
     cQuery += " FROM " + RetSqlName("SB1") + " SB1 "
+    cQuery += " INNER JOIN " + RetSqlName("SBm") + " SBM ON SBM.D_E_L_E_T_ = '' AND BM_FILIAL = '"+xFilial("SBM")+"' AND BM_GRUPO = B1_GRUPO AND BM_XDEP <> '' "
     cQuery += " INNER JOIN " + RetSqlName("SB2") + " SB2 "+ " ON SB1.B1_COD  = SB2.B2_COD "
+    cQuery += " AND B2_FILIAL = '"+xFilial("SB2")+"'"
     cQuery += " AND (SB1.B1_ESTOMIN > 0 AND SB1.B1_ESTOMAX > 0) "
     cQuery += " AND SB1.D_E_L_E_T_=' ' and SB2.D_E_L_E_T_=' '"
     cQuery += " AND SB2.B2_QATU <= SB1.B1_ESTOMIN "
-    cQuery += " AND (SB2.B2_LOCAL = '50' OR  SB2.B2_LOCAL = '51') "
-    cQuery += " ORDER BY B1_GRUPO "
-    
+    cQuery += " AND ( SB2.B2_LOCAL = '50' ) "
+    cQuery += " INNER JOIN SB0150 SB0  ON SB0.D_E_L_E_T_ = '' AND B0_FILIAL = B2_FILIAL AND SB0.B0_COD = SB1.B1_COD "
+    cQuery += " ORDER BY BM_XDEP "
+
     cQuery := ChangeQuery(cQuery)
     TcQuery cQuery New Alias (cAlias) 
     DbSelectArea(cAlias)
@@ -96,7 +101,8 @@ User Function MSTBP001()
     cGrupo := ""
     dDtEntre := Daysum(Date(), 1)
     While (cAlias)->(!EOF()) 
-        nQtdP   := (cAlias)->B1_ESTOMAX  - (cAlias)->B2_QATU  
+
+        nQtdP   := (cAlias)->B1_ESTOMAX  - IIF( (cAlias)->B2_QATU < 0,  (cAlias)->B2_QATU * -1, (cAlias)->B2_QATU )
 
         cQueryPA := " SELECT C6_QTDENT "
         cQueryPA += ", C6_QTDVEN"
@@ -125,43 +131,46 @@ User Function MSTBP001()
                 lConti := .F.
             ENDIF
         ENDIF
-
+        
         If lConti
 
             IF (cAlias)->B2_VATU1 == 0 
-                nVlrExe := ( (cAlias)->B1_PRV1 * nQtdP )
+                nVlrExe := ( Posicione('SB0',1,xfilial('SB0')+(cAlias)->B1_COD, 'B0_PRV1') * nQtdP )
             ELSE 
-                nVlrExe := (cAlias)->B2_VATU1
+                nVlrExe := ( Posicione('SB0',1,xfilial('SB0')+(cAlias)->B1_COD, 'B0_PRV1') * nQtdP ) //(cAlias)->B2_VATU1
             ENDIF
 
-            AAdd(aLiItem,{"C6_ITEM"   ,StrZero(nItem,2)           ,Nil})
-            AAdd(aLiItem,{"C6_PRODUTO",Alltrim((cAlias)->B1_COD)  ,Nil})
-            AAdd(aLiItem,{"C6_DESCRI" ,Alltrim((cAlias)->B1_DESC) ,Nil})
-            AAdd(aLiItem,{"C6_UM"     ,(cAlias)->B1_UM            ,Nil})
-            AAdd(aLiItem,{"C6_QTDVEN" ,nQtdP                      ,Nil})
-            AAdd(aLiItem,{"C6_PRCVEN" ,(cAlias)->B1_PRV1          ,Nil})
-            AAdd(aLiItem,{"C6_PRUNIT" ,0                          ,Nil})
-            AAdd(aLiItem,{"C6_LOCAL"  ,(cAlias)->B2_LOCAL         ,Nil})
-            AAdd(aLiItem,{"C6_CLI"    ,cCodCli                    ,nil})
-            AAdd(aLiItem,{"C6_LOJA"   ,cLojCli                    ,Nil})
-            AAdd(aLiItem,{"C6_ENTREG" ,dDtEntre                   ,Nil})
-            AAdd(aLiItem,{"C6_SUGENTR",dDtEntre                   ,Nil})
-            AAdd(aLiItem,{"C6_PEDCLI" ,""                         ,Nil})
-            AAdd(aLiItem,{"C6_TES"    ,cTes                       ,Nil})
-            AAdd(aLiItem,{"C6_QTDLIB" ,nQtdP                      ,Nil})
-            AAdd(aLiItem,{"C6_VALOR"  ,nVlrExe                    ,Nil})
+            AAdd(aLiItem,{"C6_ITEM"   ,StrZero(nItem,2)                                                     ,Nil})
+            AAdd(aLiItem,{"C6_PRODUTO",Alltrim((cAlias)->B1_COD)                                            ,Nil})
+            AAdd(aLiItem,{"C6_DESCRI" ,Alltrim((cAlias)->B1_DESC)                                           ,Nil})
+            AAdd(aLiItem,{"C6_UM"     ,(cAlias)->B1_UM                                                      ,Nil})
+            AAdd(aLiItem,{"C6_QTDVEN" ,nQtdP                                                                ,Nil})
+            AAdd(aLiItem,{"C6_PRCVEN" ,Posicione('SB0',1,xfilial('SB0')+(cAlias)->B1_COD, 'B0_PRV1')        ,Nil})  //(cAlias)->B1_PRV1 //
+            AAdd(aLiItem,{"C6_PRUNIT" ,0                                                                    ,Nil})
+            AAdd(aLiItem,{"C6_LOCAL"  ,(cAlias)->B2_LOCAL                                                   ,Nil})
+            AAdd(aLiItem,{"C6_CLI"    ,cCodCli                                                              ,nil})
+            AAdd(aLiItem,{"C6_LOJA"   ,cLojCli                                                              ,Nil})
+            AAdd(aLiItem,{"C6_ENTREG" ,dDtEntre                                                             ,Nil})
+            AAdd(aLiItem,{"C6_SUGENTR",dDtEntre                                                             ,Nil})
+            AAdd(aLiItem,{"C6_PEDCLI" ,""                                                                   ,Nil})
+            AAdd(aLiItem,{"C6_TES"    ,cTes                                                                 ,Nil})
+            AAdd(aLiItem,{"C6_QTDLIB" ,nQtdP                                                                ,Nil})
+            AAdd(aLiItem,{"C6_VALOR"  ,nVlrExe                                                              ,Nil})
 
             nQtdP := 0
             nItem := nItem + 1
         ENDIF
 
-        cGrupo  := (cAlias)->B1_GRUPO 
+        cGrupo  := (cAlias)->BM_XDEP//(cAlias)->B1_GRUPO 
+        
+
         (cAlias)->(DbSkip())
         
         If lConti
             AAdd(aItemPV,AClone(aLiItem))
             aLiItem := {}
-            IF cGrupo <> (cAlias)->B1_GRUPO // verifica se o grupo é diferente do proximo registro, para rodar o execAuto por Grupo 
+            //IF cGrupo <> (cAlias)->B1_GRUPO // verifica se o grupo é diferente do proximo registro, para rodar o execAuto por Grupo 
+            IF cGrupo <> (cAlias)->BM_XDEP // verifica se o grupo é diferente do proximo registro, para rodar o execAuto por Grupo 
                 
                 If Len(aCabPv) > 0 .And. Len(aItemPV) > 0        
                     lMSErroAuto := .F.
@@ -199,6 +208,7 @@ User Function MSTBP001()
     EndDo
 
     IF cNumOk <> ""
+        MSGALERT("PEDIDO GERADO",cNumOk)
         cArquivo := "C:\temp\log_ok_MATA410_" + dToS(Date()) + "_" + cValToChar(SECONDS()) + ".txt"
         MemoWrite(cArquivo, "Pedido de venda gerado com sucesso - NUMERO(S): " +  cNumOk )
     ENDIF
