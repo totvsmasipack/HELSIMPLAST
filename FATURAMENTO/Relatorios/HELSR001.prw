@@ -68,7 +68,7 @@ If MSGYESNO( "Deseja imprimir o cupom?", "Imprimir?" )
                 EndIf 
             EndIf 
         
-            oPrinter := FwMsPrinter():New("exemplo.rel", IMP_SPOOL, lAdjustToLegacy, cLocal, lDisableSetup, , , 'EPSON TM-T20X Receipt',,,,, 2)
+            oPrinter := FwMsPrinter():New("exemplo.rel", IMP_SPOOL, lAdjustToLegacy, cLocal, lDisableSetup, , , 'EPSON TM-T20X Receipt',,,,, 1)
 
             oPrinter:StartPage()
             oPrinter:Say( nLinha, 40 , "                         HELSIM",oFont2)
