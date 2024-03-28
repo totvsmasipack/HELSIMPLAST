@@ -110,9 +110,9 @@ User Function FTVD7001()
                 EndIf 
             EndIf 
 
-            If lRet .and. APGTOSSINT[nx][1] $ "BON" .and. ( Empty( M->LQ_XMOTDES ) .or. Len(M->LQ_XMOTDES) < 2 )
+            If lRet .and. APGTOSSINT[nx][1] $ "BON" .and. ( Empty( M->LQ_XMOTDES ) .or. Len(M->LQ_XMOTDES) > 2 )
                 lRet := .F.
-                Help(NIL, NIL, "FTVDHELP008", NIL, "Para aplicar Bonificação é necessário preencher o Motivo...", 1, 0)
+                Help(NIL, NIL, "FTVDHELP008", NIL, "Para aplicar Bonificação é necessário preencher o Motivo..", 1, 0)
             EndIf 
             
         Next nx 
