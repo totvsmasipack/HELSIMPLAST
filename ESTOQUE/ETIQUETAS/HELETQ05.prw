@@ -14,8 +14,8 @@ Local aParam    := {}
     If cEmpAnt == '15'
 
         AADD(aPerg, {1, 'Ord de Producao.:'		    , Space(11)	, '@!'		, ".T.", "", "", 80, .T.})
-		AADD(aPerg, {1, 'Qtde em Unidades.:'    	, 0			, '@E 9999'	, ".T.", "", "", 80, .T.})
-		AADD(aPerg, {1, 'Motivo da Reprovacao.:'	, Space(20)	, '@!'		, ".T.", "", "", 80, .T.})
+		AADD(aPerg, {1, 'Qtde em Unidades.:'    	, 0			, '@E 9999'	, ".T.", "", "", 80, .F.})
+		AADD(aPerg, {1, 'Motivo da Reprovacao.:'	, Space(20)	, '@!'		, ".T.", "", "", 80, .F.})
 		AADD(aPerg, {1, 'Responsável.:'		    	, Space(20)	, '@!'		, ".T.", "", "", 80, .T.})
 		AADD(aPerg, {1, 'Qtde de Etiquetas.:'		, 0			, '@E 9999', ".T.", "", "", 80, .T.})
         
@@ -42,7 +42,7 @@ Local cAlias    := GetNextAlias()
 
 Local cOPde		:= aParam[1]
 Local nQtdUnid	:= aParam[2]
-Local cMotRepro	:= aParam[3]
+Local cMotRepro	:= IIF(Empty(aParam[3]), '',aParam[3]) //aParam[3]
 Local cResponsa	:= aParam[4]
 Local nQtEtiq	:= aParam[5]
 
@@ -79,7 +79,7 @@ Local nCont     := 0
 
                 MSCBBOX(03,03,98,46,5)
                 MSCBSAY(05,40,"--- M A T E R I A L   R E P R O V A D O ---"			                ,"N","3","01","01")
-                MSCBSAY(05,40,"NUM. OP: " + (cAlias)->OP + " - " + DtoC(dDatabae)	                ,"N","3","01","01")	
+                MSCBSAY(05,35,"NUM. OP: " + (cAlias)->OP + " - " + DtoC(dDatabase)	                ,"N","3","01","01")	
 				MSCBSAY(05,30,"NUM DA INJETORA.: " + AllTrim((cAlias)->H1_DESCRI)	                ,"N","3","01","01")
                 MSCBSAY(05,25,"DESCRICAO DO PRODUTO.: "+SubString(AllTrim((cAlias)->B1_DESC),1,20)	,"N","3","01","01")
                 MSCBSAY(05,20,"QTDE EM UNIDADES: " + AllTrim(Str(nQtdUnid))			                ,"N","3","01","01")
