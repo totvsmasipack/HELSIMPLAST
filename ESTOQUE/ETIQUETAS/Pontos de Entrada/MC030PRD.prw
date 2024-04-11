@@ -12,17 +12,17 @@ User Function MC030PRD()
 
 Local aRetCabec := {}
 Local cMens     := ""
+Local _aArea    := GetArea()
 
 If SubStr(cNumEmp,1,2) $ "15"  //MASITUBOS 
 
-    If Empty(Posicione( "SB1",1,xFilial("SB1")+SD3->D3_COD,"B1_LOCAL" ))
+    If Empty(cMens := Posicione( "SB1",1,xFilial("SB1")+SD3->D3_COD,"B1_LOCAL" ))
         cMens := "Atualizar o Cadastro"
-    Else
-        cMens := Posicione( "SB1",1,xFilial("SB1")+SD3->D3_COD,"B1_LOCAL" )
     EndIf
 
     AADD(aRetCabec,'Local de Guarda : ' + cMens )
 EndIf
 
+RestArea(_aArea)
 
 Return aRetCabec  
